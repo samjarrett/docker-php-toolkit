@@ -3,13 +3,20 @@ sudo: required
 services:
   - docker
 
+before_script:
+  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH; fi`
+  - docker pull samjarrett/php-toolkit:$TAG
+  - docker pull samjarrett/php-toolkit-node:$TAG
+
 script:
-  - docker build -t samjarrett/php-toolkit:latest php-toolkit/.
-  - docker build -t samjarrett/php-toolkit-node:latest php-fpm-node/.
+  - docker build -t samjarrett/php-toolkit:$TRAVIS_BUILD_NUMBER php-toolkit/.
+  - docker build -t samjarrett/php-toolkit-node:$TRAVIS_BUILD_NUMBER php-fpm-node/.
 
 after_success:
-  - if [ "$TRAVIS_BRANCH" == "master" ]; then
-    docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-    docker push samjarrett/php-toolkit:latest;
-    docker push samjarrett/php-toolkit-node:latest;
-    fi
+  - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  - docker push samjarrett/php-toolkit:$TRAVIS_BUILD_NUMBER
+  - docker push samjarrett/php-toolkit-node:$TRAVIS_BUILD_NUMBER
+  - docker tag samjarrett/php-toolkit:$TRAVIS_BUILD_NUMBER samjarrett/php-toolkit:$TAG
+  - docker tag samjarrett/php-toolkit-node:$TRAVIS_BUILD_NUMBER samjarrett/php-toolkit-node:$TAG
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then docker push samjarrett/php-toolkit:$TAG; fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then docker push samjarrett/php-toolkit-node:$TAG; fi
