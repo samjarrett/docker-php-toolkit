@@ -30,6 +30,9 @@ RUN set -xe && \
         https://github.com/jwilder/dockerize/releases/download/v0.2.0/dockerize-linux-amd64-v0.2.0.tar.gz && \
     tar -C /usr/local/bin -xzvf /tmp/dockerize.tar.gz && \
     rm /tmp/dockerize.tar.gz && \
+    # Install PHPUnit
+    curl -L -o /usr/local/bin/phpunit https://phar.phpunit.de/phpunit.phar && \
+    chmod +x /usr/local/bin/phpunit && \
     true
 
 COPY config/timezone.ini config/opcache.ini config/realpath-cache.ini /usr/local/etc/php/conf.d/
