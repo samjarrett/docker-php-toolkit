@@ -9,14 +9,14 @@ before_script:
   - docker pull samjarrett/php-toolkit-node:$TAG
 
 script:
-  - docker build -t samjarrett/php-toolkit:$TRAVIS_BUILD_NUMBER php-toolkit/.
-  - docker build -t samjarrett/php-toolkit-node:$TRAVIS_BUILD_NUMBER php-fpm-node/.
+  - docker build --pull -t samjarrett/php-toolkit:build-$TRAVIS_BUILD_NUMBER php-toolkit/.
+  - docker build --pull -t samjarrett/php-toolkit-node:build-$TRAVIS_BUILD_NUMBER php-fpm-node/.
 
 after_success:
   - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-  - docker push samjarrett/php-toolkit:$TRAVIS_BUILD_NUMBER
-  - docker push samjarrett/php-toolkit-node:$TRAVIS_BUILD_NUMBER
-  - docker tag samjarrett/php-toolkit:$TRAVIS_BUILD_NUMBER samjarrett/php-toolkit:$TAG
-  - docker tag samjarrett/php-toolkit-node:$TRAVIS_BUILD_NUMBER samjarrett/php-toolkit-node:$TAG
+  - docker push samjarrett/php-toolkit:build-$TRAVIS_BUILD_NUMBER
+  - docker push samjarrett/php-toolkit-node:build-$TRAVIS_BUILD_NUMBER
+  - docker tag samjarrett/php-toolkit:build-$TRAVIS_BUILD_NUMBER samjarrett/php-toolkit:$TAG
+  - docker tag samjarrett/php-toolkit-node:build-$TRAVIS_BUILD_NUMBER samjarrett/php-toolkit-node:$TAG
   - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then docker push samjarrett/php-toolkit:$TAG; fi
   - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then docker push samjarrett/php-toolkit-node:$TAG; fi
