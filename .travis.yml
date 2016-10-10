@@ -5,18 +5,23 @@ services:
 
 before_script:
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH; fi`
-  - docker pull samjarrett/php-toolkit:$TAG
-  - docker pull samjarrett/php-toolkit-node:$TAG
+  - docker pull samjarrett/php-toolkit:$TAG || true
+  - docker pull samjarrett/php-toolkit-node:$TAG || true
+  - docker pull samjarrett/nginx-php-fpm:$TAG || true
 
 script:
   - docker build --pull -t samjarrett/php-toolkit:build-$TRAVIS_BUILD_NUMBER php-toolkit/.
   - docker build --pull -t samjarrett/php-toolkit-node:build-$TRAVIS_BUILD_NUMBER php-fpm-node/.
+  - docker build --pull -t samjarrett/nginx-php-fpm:build-$TRAVIS_BUILD_NUMBER nginx-php-fpm/.
 
 after_success:
   - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
   - docker push samjarrett/php-toolkit:build-$TRAVIS_BUILD_NUMBER
   - docker push samjarrett/php-toolkit-node:build-$TRAVIS_BUILD_NUMBER
+  - docker push samjarrett/nginx-php-fpm:build-$TRAVIS_BUILD_NUMBER
   - docker tag samjarrett/php-toolkit:build-$TRAVIS_BUILD_NUMBER samjarrett/php-toolkit:$TAG
   - docker tag samjarrett/php-toolkit-node:build-$TRAVIS_BUILD_NUMBER samjarrett/php-toolkit-node:$TAG
+  - docker tag samjarrett/nginx-php-fpm:build-$TRAVIS_BUILD_NUMBER samjarrett/nginx-php-fpm:$TAG
   - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then docker push samjarrett/php-toolkit:$TAG; fi
   - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then docker push samjarrett/php-toolkit-node:$TAG; fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then docker push samjarrett/nginx-php-fpm:$TAG; fi
