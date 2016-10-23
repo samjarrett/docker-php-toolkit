@@ -2,7 +2,7 @@ FROM php:7.0-fpm
 
 MAINTAINER Sam Marley-Jarrett <hi@samjarrett.com.au>
 
-ENV PHP_TIMEZONE "Australia/Melbourne"
+ENV PHP_TIMEZONE "Etc/UTC"
 
 RUN set -xe && \
     # Add a variety of standard PHP dependencies: gd, opcache, pdo/mysql, mbstring, bcmath
@@ -35,6 +35,6 @@ RUN set -xe && \
     chmod +x /usr/local/bin/phpunit && \
     true
 
-COPY config/timezone.ini config/opcache.ini config/realpath-cache.ini /usr/local/etc/php/conf.d/
+COPY config /usr/local/etc/php/conf.d
 
-CMD ["dockerize", "-template" "/usr/local/etc/php/conf.d/timezone.ini:/usr/local/etc/php/conf.d/timezone.ini", "php-fpm"]
+CMD ["dockerize", "-template" "/usr/local/etc/php/conf.d/timezone.ini.template:/usr/local/etc/php/conf.d/timezone.ini", "php-fpm"]
