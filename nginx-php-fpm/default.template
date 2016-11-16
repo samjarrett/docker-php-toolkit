@@ -6,7 +6,7 @@ client_max_body_size 300M;
 send_timeout 300s;
 
 upstream backend_pool {
-    server app:9000;
+    server ${PHP_HOST}:9000;
 }
 
 server {
