@@ -1,40 +1,26 @@
-FROM php:7.0-fpm
-
-MAINTAINER Sam Marley-Jarrett <hi@samjarrett.com.au>
-
-ENV PHP_TIMEZONE "Etc/UTC"
+FROM php:7.0-fpm-alpine 
 
 RUN set -xe && \
-    # Add a variety of standard PHP dependencies: gd, opcache, pdo/mysql, mbstring, bcmath
-    apt-get -qq update && \
-    apt-get -qq install \
-        git \
-        zlib1g-dev \
-        libjpeg-dev \
-        libpng12-dev \
-        libicu-dev \
-        --no-install-recommends && \
-    docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr > /dev/null && \
-    docker-php-ext-install zip pdo pdo_mysql gd opcache mbstring bcmath intl pcntl > /dev/null && \
-    # Add php dep: APCU
+    apk add --no-cache freetype libintl libpng libjpeg-turbo icu && \
+    apk add --no-cache --virtual .build-deps zlib-dev freetype-dev libpng-dev libjpeg-turbo-dev icu-dev $PHPIZE_DEPS && \
+    docker-php-ext-configure gd \
+        --with-freetype-dir=/usr/include/ \
+        --with-png-dir=/usr/include/ \
+        --with-jpeg-dir=/usr/include/ && \
+    NPROC=$(getconf _NPROCESSORS_ONLN) && \
+    docker-php-ext-install -j${NPROC} zip iconv pdo pdo_mysql gd opcache mbstring bcmath intl pcntl && \
     pecl install apcu && \
     echo extension=apcu.so > /usr/local/etc/php/conf.d/apcu.ini && \
-    # Clean up
-    apt-get clean && \
-    rm -r /var/lib/apt/lists/* && \
+    apk del .build-deps && \
     # Install composer
     curl -sS https://getcomposer.org/installer | \
         php -- --install-dir=/usr/local/bin --filename=composer && \
     # Install Dockerize
-    curl -o /tmp/dockerize.tar.gz -L \
-        https://github.com/jwilder/dockerize/releases/download/v0.2.0/dockerize-linux-amd64-v0.2.0.tar.gz && \
-    tar -C /usr/local/bin -xzvf /tmp/dockerize.tar.gz && \
-    rm /tmp/dockerize.tar.gz && \
-    # Install PHPUnit
-    curl -L -o /usr/local/bin/phpunit https://phar.phpunit.de/phpunit.phar && \
-    chmod +x /usr/local/bin/phpunit && \
+    curl -sSL \
+        https://github.com/jwilder/dockerize/releases/download/v0.2.0/dockerize-linux-amd64-v0.2.0.tar.gz | \
+        tar -C /usr/local/bin -xzv && \
     true
-
+    
 COPY config /usr/local/etc/php/conf.d
 
 CMD ["dockerize", "-template" "/usr/local/etc/php/conf.d/timezone.ini.template:/usr/local/etc/php/conf.d/timezone.ini", "php-fpm"]
