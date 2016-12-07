@@ -1,4 +1,4 @@
-FROM samjarrett/php-toolkit:alpine
+FROM samjarrett/php-toolkit
 
 ENV NODE_VERSION 6.9.1
 RUN set -xe && \
