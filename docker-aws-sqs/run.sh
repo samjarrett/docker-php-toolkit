@@ -23,14 +23,10 @@ docker ps -f label=$DOCKER_LABELS
 echo "Received message with ID: $MESSAGE_ID"
 
 echo "> docker pull $DOCKER_REPO"
-docker pull $DOCKER_REPO | grep "newer image"
+docker pull $DOCKER_REPO
 
-if [ $? -eq 0 ]
-then
-	echo "Found newer version"
-	echo "> docker stop $EXISTING_CONTAINERS"
-	docker stop $EXISTING_CONTAINERS
-fi
+echo "> docker stop $EXISTING_CONTAINERS"
+docker stop $EXISTING_CONTAINERS
 
 echo "> aws sqs delete-message --queue-url $SQS_QUEUE_URL --receipt-handle $RECEIPT_HANDLE"
 aws sqs delete-message --queue-url $SQS_QUEUE_URL --receipt-handle $RECEIPT_HANDLE
