@@ -1,0 +1,153 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+
+    "Parameters": {
+        "AlarmEmail": {
+            "Default": "nobody@amazon.com",
+            "Description": "Email address to notify if operational problems arise",
+            "Type": "String"
+        }
+    },
+
+    "Resources": {
+        "Queue": {
+            "Type": "AWS::SQS::Queue",
+            "Properties": {
+                "QueueName": "RedeployQueue"
+            }
+        },
+        "AlarmTopic": {
+            "Type": "AWS::SNS::Topic",
+            "Properties": {
+                "Subscription": [{
+                    "Endpoint": { "Ref": "AlarmEmail" },
+                    "Protocol": "email"
+                }]
+            }
+        },
+        "QueueDepthAlarm": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmDescription": "Alarm if queue depth grows beyond 5 messages",
+                "Namespace": "AWS/SQS",
+                "MetricName": "ApproximateNumberOfMessagesVisible",
+                "Dimensions": [{
+                    "Name": "QueueName",
+                    "Value": { "Fn::GetAtt": ["Queue", "QueueName"] }
+                }],
+                "Statistic": "Sum",
+                "Period": "300",
+                "EvaluationPeriods": "1",
+                "Threshold": "5",
+                "ComparisonOperator": "GreaterThanThreshold",
+                "AlarmActions": [{ "Ref": "AlarmTopic" }],
+                "InsufficientDataActions": [{ "Ref": "AlarmTopic" }]
+            }
+        },
+        "QueueDepthAlarm": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmDescription": "Alarm if oldest message is more than 2 hours old",
+                "Namespace": "AWS/SQS",
+                "MetricName": "ApproximateAgeOfOldestMessage",
+                "Dimensions": [{
+                    "Name": "QueueName",
+                    "Value": { "Fn::GetAtt": ["Queue", "QueueName"] }
+                }],
+                "Statistic": "Sum",
+                "Period": "300",
+                "EvaluationPeriods": "1",
+                "Threshold": "7200",
+                "ComparisonOperator": "GreaterThanThreshold",
+                "AlarmActions": [{ "Ref": "AlarmTopic" }],
+                "InsufficientDataActions": [{ "Ref": "AlarmTopic" }]
+            }
+        },
+
+        "PublishUser": {
+            "Type": "AWS::IAM::User",
+            "Properties": {
+                "Policies": [{
+                    "PolicyName": "SQSPublishUser",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [{
+                            "Action": ["sqs:SendMessage"],
+                            "Effect": "Allow",
+                            "Resource": [
+                                { "Fn::GetAtt": ["Queue", "Arn"] }
+                            ]
+                        }]
+                    }
+                }]
+            }
+        },
+        "PublishUserAccessKey": {
+            "Type": "AWS::IAM::AccessKey",
+            "Properties": {
+                "UserName": {
+                    "Ref": "PublishUser"
+                }
+            }
+        },
+        "RetrieveUser": {
+            "Type": "AWS::IAM::User",
+            "Properties": {
+                "Policies": [{
+                    "PolicyName": "SQSRetrieveUser",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [{
+                            "Action": [
+                                "sqs:ReceiveMessage", 
+                                "sqs:DeleteMessage",
+                                "sqs:ListQueues",
+                                "sqs:ChangeMessageVisibility"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": [
+                                { "Fn::GetAtt": ["Queue", "Arn"] }
+                            ]
+                        }]
+                    }
+                }]
+            }
+        },
+        "RetrieveUserAccessKey": {
+            "Type": "AWS::IAM::AccessKey",
+            "Properties": {
+                "UserName": {
+                    "Ref": "RetrieveUser"
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "QueueURL": {
+            "Description": "URL of SQS Queue",
+            "Value": { "Ref": "Queue" }
+        },
+        "QueueARN": {
+            "Description": "ARN of SQS Queue",
+            "Value": { "Fn::GetAtt": ["Queue", "Arn"] }
+        },
+        "RedeployQueue": {
+            "Description": "Name SQS Queue",
+            "Value": {
+                "Fn::GetAtt": ["Queue", "QueueName"]
+            }
+        },
+        "PublishUserAccessKeyId": {
+            "Value": { "Ref": "PublishUserAccessKey" }
+        },
+        "PublishUserAccessKeySecret": {
+            "Value": { "Fn::GetAtt": [ "PublishUserAccessKey", "SecretAccessKey" ] }
+        },
+        "RetrieveUserAccessKeyId": {
+            "Value": { "Ref": "RetrieveUserAccessKey" }
+        },
+        "RetrieveUserAccessKeySecret": {
+            "Value": { "Fn::GetAtt": [ "RetrieveUserAccessKey", "SecretAccessKey" ] }
+        }
+    }
+}
