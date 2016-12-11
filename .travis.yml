@@ -7,6 +7,7 @@ env:
   - DOCKER_REPO="samjarrett/php-toolkit" BUILD_DIRECTORY="php-toolkit/."
   - DOCKER_REPO="samjarrett/php-toolkit-node" BUILD_DIRECTORY="php-fpm-node/."
   - DOCKER_REPO="samjarrett/nginx-php-fpm" BUILD_DIRECTORY="nginx-php-fpm/."
+  - DOCKER_REPO="samjarrett/docker-aws-sqs" BUILD_DIRECTORY="docker-aws-sqs/."
 
 before_script:
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH; fi`
