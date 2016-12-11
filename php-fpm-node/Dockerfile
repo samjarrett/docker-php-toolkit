@@ -1,6 +1,6 @@
 FROM samjarrett/php-toolkit
 
-ENV NODE_VERSION 6.9.1
+ENV NODE_VERSION 7.2.1
 RUN set -xe && \
     apk add --no-cache \
         libstdc++ \
