@@ -9,7 +9,7 @@ MESSAGES=$(aws sqs receive-message --message-attribute-names All --max-number-of
 if [ -z "$MESSAGES" ]
 then
 	echo "No messages"
-	exit 1
+	exit 0
 fi
 
 MESSAGE_ID=$(echo $MESSAGES | jq -r .Messages[0].MessageId)
