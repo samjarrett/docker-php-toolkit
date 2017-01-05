@@ -1,5 +1,7 @@
 FROM php:7.0-fpm-alpine 
 
+ENV PHP_TIMEZONE "Etc\UTC"
+
 RUN set -xe && \
     apk add --no-cache freetype libintl libpng libjpeg-turbo icu && \
     apk add --no-cache --virtual .build-deps zlib-dev freetype-dev libpng-dev libjpeg-turbo-dev icu-dev $PHPIZE_DEPS && \
