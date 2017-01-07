@@ -1,6 +1,7 @@
 FROM php:7.0-fpm-alpine 
 
-ENV PHP_TIMEZONE "Etc\UTC"
+ENV PHP_TIMEZONE "Etc\UTC" \
+    COMPOSER_ALLOW_SUPERUSER 1
 
 RUN set -xe && \
     apk add --no-cache freetype libintl libpng libjpeg-turbo icu && \
