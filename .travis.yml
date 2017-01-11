@@ -22,4 +22,4 @@ after_success:
   # Tag build across to the branch (or latest, for master builds)
   - docker tag ${DOCKER_REPO}:build-$TRAVIS_BUILD_NUMBER ${DOCKER_REPO}:$TAG
   # If not a pull request, push it to the remote
-  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then docker push ${DOCKER_REPO}-node:$TAG; fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then docker push ${DOCKER_REPO}:$TAG; fi
