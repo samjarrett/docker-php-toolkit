@@ -1,6 +1,12 @@
 FROM php:7.0-fpm-alpine 
 
 ENV PHP_TIMEZONE="Etc\UTC" \
+    FPM_PROCESS_MANAGER="dynamic" \
+    FPM_MAX_CHILDREN=5 \
+    FPM_START_SERVERS=2 \
+    FPM_MIN_SPARE_SERVERS=1 \
+    FPM_MAX_SPARE_SERVERS=3 \
+    FPM_PROCESS_IDLE_TIMEOUT="10s" \
     COMPOSER_ALLOW_SUPERUSER=1
 
 RUN set -xe && \
@@ -25,5 +31,9 @@ RUN set -xe && \
     true
     
 COPY config /usr/local/etc/php/conf.d
+COPY www.conf /usr/local/etc/php-fpm.d/www.conf.template
 
-CMD ["dockerize", "-template" "/usr/local/etc/php/conf.d/timezone.ini.template:/usr/local/etc/php/conf.d/timezone.ini", "php-fpm"]
+CMD dockerize \
+    -template /usr/local/etc/php/conf.d/timezone.ini.template:/usr/local/etc/php/conf.d/timezone.ini \
+    -template /usr/local/etc/php-fpm.d/www.conf.template:/usr/local/etc/php-fpm.d/www.conf \
+    php-fpm
