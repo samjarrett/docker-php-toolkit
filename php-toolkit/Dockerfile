@@ -12,14 +12,14 @@ ENV PHP_TIMEZONE="Etc\UTC" \
 RUN set -xe && \
     apk add --no-cache --quiet freetype libintl libpng libjpeg-turbo icu && \
     apk add --no-cache --quiet --virtual .build-deps zlib-dev freetype-dev libpng-dev libjpeg-turbo-dev icu-dev $PHPIZE_DEPS && \
-    sed -i 's#set -e#unset -e#' /usr/local/bin/docker-php-ext-configure && \
+    sed -i 's#set -x#set +x#' /usr/local/bin/docker-php-ext-configure && \
     docker-php-ext-configure gd \
         --with-freetype-dir=/usr/include/ \
         --with-png-dir=/usr/include/ \
         --with-jpeg-dir=/usr/include/ && \
     NPROC=$(getconf _NPROCESSORS_ONLN) && \
     docker-php-ext-install -j${NPROC} zip iconv pdo pdo_mysql gd opcache mbstring bcmath intl pcntl && \
-    sed -i 's#unset -e#set -e#' /usr/local/bin/docker-php-ext-configure && \
+    sed -i 's#set +x#set -x#' /usr/local/bin/docker-php-ext-configure && \
     pecl install apcu && \
     echo extension=apcu.so > /usr/local/etc/php/conf.d/apcu.ini && \
     apk del --quiet .build-deps && \
