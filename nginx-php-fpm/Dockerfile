@@ -1,6 +1,9 @@
 FROM nginx:alpine
 
-COPY default.template /etc/nginx/conf.d/default.template
-
 ENV PHP_HOST=app
-CMD envsubst '$PHP_HOST' < /etc/nginx/conf.d/default.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'
+
+COPY default.template /etc/nginx/conf.d/default.template
+COPY run.sh /run.sh
+
+ENTRYPOINT ["/run.sh"]
+CMD ["nginx", "-g", "daemon off;"]
