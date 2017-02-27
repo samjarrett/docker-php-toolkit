@@ -1,4 +1,4 @@
-FROM php:7.0-fpm-alpine 
+FROM php:7.1-fpm-alpine
 
 ENV PHP_TIMEZONE="Etc\UTC" \
     FPM_PROCESS_MANAGER="dynamic" \
@@ -10,7 +10,7 @@ ENV PHP_TIMEZONE="Etc\UTC" \
     COMPOSER_ALLOW_SUPERUSER=1
 
 RUN set -xe && \
-    apk add --no-cache --quiet freetype libintl libpng libjpeg-turbo icu && \
+    apk add --no-cache --quiet freetype libintl libpng libjpeg-turbo icu grep && \
     apk add --no-cache --quiet --virtual .build-deps zlib-dev freetype-dev libpng-dev libjpeg-turbo-dev icu-dev $PHPIZE_DEPS && \
     sed -i 's#set -x#set +x#' /usr/local/bin/docker-php-ext-configure && \
     docker-php-ext-configure gd \
@@ -34,8 +34,7 @@ RUN set -xe && \
     
 COPY config /usr/local/etc/php/conf.d
 COPY www.conf /usr/local/etc/php-fpm.d/www.conf.template
+COPY run.sh /run.sh
 
-CMD dockerize \
-    -template /usr/local/etc/php/conf.d/timezone.ini.template:/usr/local/etc/php/conf.d/timezone.ini \
-    -template /usr/local/etc/php-fpm.d/www.conf.template:/usr/local/etc/php-fpm.d/www.conf \
-    php-fpm
+ENTRYPOINT /run.sh
+CMD php-fpm
