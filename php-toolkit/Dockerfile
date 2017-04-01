@@ -1,6 +1,8 @@
 FROM php:7.1-fpm-alpine
 
 ENV PHP_TIMEZONE="Etc\UTC" \
+    FPM_PHP_USER="www-data" \
+    FPM_PHP_GROUP="www-data" \
     FPM_PROCESS_MANAGER="dynamic" \
     FPM_MAX_CHILDREN=5 \
     FPM_START_SERVERS=2 \
@@ -33,8 +35,4 @@ RUN set -xe && \
     true
     
 COPY config /usr/local/etc/php/conf.d
-COPY www.conf /usr/local/etc/php-fpm.d/www.conf.template
-COPY run.sh /run.sh
-
-ENTRYPOINT /run.sh
-CMD php-fpm
+COPY www.conf /usr/local/etc/php-fpm.d/www.conf
