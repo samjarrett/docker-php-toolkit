@@ -1,6 +1,6 @@
 FROM php:7.1-fpm-alpine
 
-ENV PHP_TIMEZONE="Etc\UTC" \
+ENV PHP_TIMEZONE="UTC" \
     FPM_PHP_USER="www-data" \
     FPM_PHP_GROUP="www-data" \
     FPM_PROCESS_MANAGER="dynamic" \
