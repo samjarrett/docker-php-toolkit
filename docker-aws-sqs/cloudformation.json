@@ -6,6 +6,16 @@
             "Default": "nobody@amazon.com",
             "Description": "Email address to notify if operational problems arise",
             "Type": "String"
+        },
+        "MaxAgeBeforeNotification": {
+            "Default": 7200,
+            "Description": "Maximum queue age before triggering the alarm",
+            "Type": "Number"
+        },
+        "MaxDepthBeforeNotification": {
+            "Default": 5,
+            "Description": "Maximum queue depth before triggering the alarm",
+            "Type": "Number"
         }
     },
 
@@ -28,7 +38,11 @@
         "QueueDepthAlarm": {
             "Type": "AWS::CloudWatch::Alarm",
             "Properties": {
-                "AlarmDescription": "Alarm if queue depth grows beyond 5 messages",
+                "AlarmDescription": { "Fn::Join" : [ " ", [
+                    "Alarm if queue depth grows beyond",
+                    { "Ref": "MaxDepthBeforeNotification" },
+                    "messages"
+                ] ] },
                 "Namespace": "AWS/SQS",
                 "MetricName": "ApproximateNumberOfMessagesVisible",
                 "Dimensions": [{
@@ -38,16 +52,20 @@
                 "Statistic": "Sum",
                 "Period": "300",
                 "EvaluationPeriods": "1",
-                "Threshold": "5",
+                "Threshold": { "Ref": "MaxDepthBeforeNotification" },
                 "ComparisonOperator": "GreaterThanThreshold",
                 "AlarmActions": [{ "Ref": "AlarmTopic" }],
                 "InsufficientDataActions": [{ "Ref": "AlarmTopic" }]
             }
         },
-        "QueueDepthAlarm": {
+        "QueueAgeAlarm": {
             "Type": "AWS::CloudWatch::Alarm",
             "Properties": {
-                "AlarmDescription": "Alarm if oldest message is more than 2 hours old",
+                "AlarmDescription": { "Fn::Join" : [ " ", [
+                    "Alarm if oldest message is more than",
+                    { "Ref": "MaxAgeBeforeNotification" },
+                    "seconds old"
+                ] ] },
                 "Namespace": "AWS/SQS",
                 "MetricName": "ApproximateAgeOfOldestMessage",
                 "Dimensions": [{
@@ -57,7 +75,7 @@
                 "Statistic": "Sum",
                 "Period": "300",
                 "EvaluationPeriods": "1",
-                "Threshold": "7200",
+                "Threshold": { "Ref": "MaxAgeBeforeNotification" },
                 "ComparisonOperator": "GreaterThanThreshold",
                 "AlarmActions": [{ "Ref": "AlarmTopic" }],
                 "InsufficientDataActions": [{ "Ref": "AlarmTopic" }]
@@ -99,7 +117,7 @@
                         "Version": "2012-10-17",
                         "Statement": [{
                             "Action": [
-                                "sqs:ReceiveMessage", 
+                                "sqs:ReceiveMessage",
                                 "sqs:DeleteMessage",
                                 "sqs:ListQueues",
                                 "sqs:ChangeMessageVisibility"
@@ -148,6 +166,20 @@
         },
         "RetrieveUserAccessKeySecret": {
             "Value": { "Fn::GetAtt": [ "RetrieveUserAccessKey", "SecretAccessKey" ] }
+        },
+        "PublishUser": {
+            "Value": { "Ref": "PublishUser" },
+            "Description": "The user that can publish SQS queries",
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-PublishUser" }
+            }
+        },
+        "RetrieveUser": {
+            "Value": { "Ref": "RetrieveUser" },
+            "Description": "The user that can retrieve SQS queries",
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-RetrieveUser" }
+            }
         }
     }
 }
