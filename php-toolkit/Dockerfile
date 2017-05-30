@@ -12,7 +12,6 @@ ENV PHP_TIMEZONE="UTC" \
     COMPOSER_ALLOW_SUPERUSER=1
 
 RUN set -xe && \
-    apk add --no-cache --quiet freetype libintl libpng libjpeg-turbo icu grep && \
     apk add --no-cache --quiet --virtual .build-deps zlib-dev freetype-dev libpng-dev libjpeg-turbo-dev icu-dev $PHPIZE_DEPS && \
     sed -i 's#set -x#set +x#' /usr/local/bin/docker-php-ext-configure && \
     docker-php-ext-configure gd \
@@ -24,11 +23,23 @@ RUN set -xe && \
     sed -i 's#set +x#set -x#' /usr/local/bin/docker-php-ext-configure && \
     pecl install apcu && \
     echo extension=apcu.so > /usr/local/etc/php/conf.d/apcu.ini && \
+    runDeps="$( \
+            scanelf --needed --nobanner --recursive /usr/local \
+                | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
+                | sort -u \
+                | xargs -r apk info --installed \
+                | sort -u \
+        )" && \
+    apk add --no-cache --virtual .run-deps $runDeps && \
     apk del --quiet .build-deps && \
-    # Install composer
+    true
+
+RUN set -xe && \
     curl -sS https://getcomposer.org/installer | \
         php -- --install-dir=/usr/local/bin --filename=composer && \
-    # Install Dockerize
+    true
+
+RUN set -xe && \
     curl -sSL \
         https://github.com/jwilder/dockerize/releases/download/v0.2.0/dockerize-linux-amd64-v0.2.0.tar.gz | \
         tar -C /usr/local/bin -xzv && \
