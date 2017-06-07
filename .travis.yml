@@ -13,7 +13,7 @@ before_script:
   - docker pull ${DOCKER_REPO}:$TAG || true
 
 script:
-  - docker build --pull -t ${DOCKER_REPO}:build-$TRAVIS_BUILD_NUMBER ${BUILD_DIRECTORY}
+  - docker build --cache-from ${DOCKER_REPO}:$TAG --pull -t ${DOCKER_REPO}:build-$TRAVIS_BUILD_NUMBER ${BUILD_DIRECTORY}
 
 after_success:
   - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
