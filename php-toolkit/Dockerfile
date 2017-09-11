@@ -39,11 +39,22 @@ RUN set -xe && \
         php -- --install-dir=/usr/local/bin --filename=composer && \
     true
 
+ENV DOCKERIZE_VERSION "0.5.0"
 RUN set -xe && \
     curl -sSL \
-        https://github.com/jwilder/dockerize/releases/download/v0.2.0/dockerize-linux-amd64-v0.2.0.tar.gz | \
+        https://github.com/jwilder/dockerize/releases/download/v${DOCKERIZE_VERSION}/dockerize-alpine-linux-amd64-v${DOCKERIZE_VERSION}.tar.gz | \
         tar -C /usr/local/bin -xzv && \
     true
-    
+
+ENV DUMB_INIT_VERSION "1.2.0"
+RUN set -xe && \
+    curl -sSLo /usr/local/bin/dumb-init \
+        https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_amd64 && \
+    chmod +x /usr/local/bin/dumb-init && \
+    true
+
+ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
+CMD ["php-fpm"]
+
 COPY config /usr/local/etc/php/conf.d
 COPY www.conf /usr/local/etc/php-fpm.d/www.conf
