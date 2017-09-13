@@ -1,3 +1,5 @@
+FROM composer:1 AS composer
+
 FROM php:7.1-fpm-alpine
 
 ENV PHP_TIMEZONE="UTC" \
@@ -34,10 +36,7 @@ RUN set -xe && \
     apk del --quiet .build-deps && \
     true
 
-RUN set -xe && \
-    curl -sS https://getcomposer.org/installer | \
-        php -- --install-dir=/usr/local/bin --filename=composer && \
-    true
+COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 ENV DOCKERIZE_VERSION "0.5.0"
 RUN set -xe && \
