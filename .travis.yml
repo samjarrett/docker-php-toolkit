@@ -9,11 +9,13 @@ env:
   - DOCKER_REPO="samjarrett/docker-aws-sqs" BUILD_DIRECTORY="docker-aws-sqs"
 
 before_script:
+  - sudo apt-get -qq update
+  - sudo apt-get -qq --no-install-recommends -o Dpkg::Options::="--force-confnew" install docker-ce
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH; fi`
   - docker pull ${DOCKER_REPO}:$TAG || true
 
 script:
-  - docker build --pull -t ${DOCKER_REPO}:build-$TRAVIS_BUILD_NUMBER ${BUILD_DIRECTORY}
+  - docker build --pull --cache-from ${DOCKER_REPO}:$TAG -t ${DOCKER_REPO}:build-$TRAVIS_BUILD_NUMBER ${BUILD_DIRECTORY}
 
 after_success:
   - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
