@@ -7,6 +7,7 @@ env:
   - DOCKER_REPO="samjarrett/php-toolkit" BUILD_DIRECTORY="php-toolkit"
   - DOCKER_REPO="samjarrett/nginx-php-fpm" BUILD_DIRECTORY="nginx-php-fpm"
   - DOCKER_REPO="samjarrett/docker-aws-sqs" BUILD_DIRECTORY="docker-aws-sqs"
+  - DOCKER_REPO="samjarrett/ghost" BUILD_DIRECTORY="ghost"
 
 before_script:
   - sudo apt-get -qq update
