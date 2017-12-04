@@ -1,6 +1,6 @@
 FROM composer:1 AS composer
 
-FROM php:7.1-fpm-alpine
+FROM php:7.2-fpm-alpine
 
 ENV PHP_TIMEZONE="UTC" \
     FPM_PHP_USER="www-data" \
