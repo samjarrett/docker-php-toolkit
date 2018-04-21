@@ -14,6 +14,13 @@ ENV PHP_TIMEZONE="UTC" \
     COMPOSER_ALLOW_SUPERUSER=1
 
 RUN set -xe && \
+    apk add --no-cache --quiet tini && \
+    true
+
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["php-fpm"]
+
+RUN set -xe && \
     apk add --no-cache --quiet --virtual .build-deps zlib-dev freetype-dev libpng-dev libjpeg-turbo-dev icu-dev $PHPIZE_DEPS && \
     sed -i 's#set -x#set +x#' /usr/local/bin/docker-php-ext-configure && \
     docker-php-ext-configure gd \
@@ -38,22 +45,12 @@ RUN set -xe && \
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
-ENV DOCKERIZE_VERSION "0.5.0"
+ENV DOCKERIZE_VERSION "0.6.1"
 RUN set -xe && \
     curl -sSL \
         https://github.com/jwilder/dockerize/releases/download/v${DOCKERIZE_VERSION}/dockerize-alpine-linux-amd64-v${DOCKERIZE_VERSION}.tar.gz | \
         tar -C /usr/local/bin -xzv && \
     true
-
-ENV DUMB_INIT_VERSION "1.2.0"
-RUN set -xe && \
-    curl -sSLo /usr/local/bin/dumb-init \
-        https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_amd64 && \
-    chmod +x /usr/local/bin/dumb-init && \
-    true
-
-ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
-CMD ["php-fpm"]
 
 COPY config /usr/local/etc/php/conf.d
 COPY www.conf /usr/local/etc/php-fpm.d/www.conf
