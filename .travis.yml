@@ -10,8 +10,6 @@ env:
   - DOCKER_REPO="samjarrett/ghost" BUILD_DIRECTORY="ghost"
 
 before_script:
-  - sudo apt-get -qq update
-  - sudo apt-get -qq --no-install-recommends -o Dpkg::Options::="--force-confnew" install docker-ce
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH; fi`
   - docker pull ${DOCKER_REPO}:$TAG || true
 
