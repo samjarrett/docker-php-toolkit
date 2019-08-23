@@ -1,0 +1,50 @@
+client_body_in_file_only clean;
+client_body_buffer_size 32K;
+
+client_max_body_size 300M;
+
+send_timeout 300s;
+
+upstream app_server {
+  server ${BACKEND_HOST}:8000;
+}
+
+upstream node_server {
+  server frontend:3000;
+}
+
+server {
+  server_name localhost;
+  root /web;
+
+  location / {
+    # try to serve file directly, fallback to app
+    try_files $uri @proxy_to_app;
+  }
+
+  gzip on;
+  gzip_static on;
+  gzip_buffers 16 8k;
+  gzip_comp_level 9;
+  gzip_http_version 1.0;
+  gzip_min_length 0;
+  gzip_types text/plain
+    text/css
+    image/svg+xml
+    text/js
+    application/javascript
+    application/x-javascript;
+  gzip_vary on;
+  gzip_proxied expired no-cache no-store private auth;
+  gzip_disable "MSIE [1-6]\.";
+
+  location @proxy_to_app {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+    proxy_buffering off;
+
+    proxy_pass http://app_server;
+  }
+}
