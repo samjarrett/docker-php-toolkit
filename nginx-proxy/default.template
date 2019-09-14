@@ -9,10 +9,6 @@ upstream app_server {
   server ${BACKEND_HOST}:8000;
 }
 
-upstream node_server {
-  server frontend:3000;
-}
-
 server {
   server_name localhost;
   root /web;
