@@ -6,7 +6,8 @@ RUN set -xe && \
     apk add --no-cache tini && \
     true
 
-COPY default.template /etc/nginx/conf.d/default.template
+COPY global-settings.template /etc/nginx/conf.d/global-settings.template
+COPY default.conf /etc/nginx/conf.d/default.conf
 COPY docker-entrypoint /docker-entrypoint
 
 ENTRYPOINT ["/sbin/tini", "--", "/docker-entrypoint"]
