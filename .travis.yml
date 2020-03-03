@@ -9,6 +9,7 @@ env:
   - DOCKER_REPO="samjarrett/nginx-proxy" BUILD_DIRECTORY="nginx-proxy"
   - DOCKER_REPO="samjarrett/docker-aws-sqs" BUILD_DIRECTORY="docker-aws-sqs"
   - DOCKER_REPO="samjarrett/ghost" BUILD_DIRECTORY="ghost"
+  - DOCKER_REPO="samjarrett/travis-cli" BUILD_DIRECTORY="travis-cli"
 
 before_script:
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH; fi`
